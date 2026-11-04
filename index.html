@@ -72,7 +72,7 @@
   .head .count{margin-left:auto; font-family:var(--hand); font-size:1.35rem; color:var(--ink-soft)}
 
   /* ============ specimens ============ */
-  .specimens{padding:5.5rem 0 2rem}
+  .specimens{padding-top:5.5rem; padding-bottom:2rem}
   .entry{display:grid; grid-template-columns:minmax(220px,300px) 1fr; gap:clamp(28px,5vw,72px); padding:0 0 4.5rem; margin:0 0 4.5rem; border-bottom:1px dashed var(--rule)}
   .entry:last-child{border-bottom:0; margin-bottom:0}
   .plate{position:sticky; top:6vh; align-self:start; margin:0}
@@ -133,14 +133,13 @@
   .station p{margin:0 0 1.1rem; hyphens:auto}
   .station .em{color:var(--gamosa); font-style:italic}
 
-  .last{padding:clamp(220px,30vw,340px) 0 3rem; color:var(--night-ink)}
+  .last{padding-top:clamp(220px,30vw,340px); padding-bottom:3rem; color:var(--night-ink)}
   .last .eyebrow{color:var(--night-soft); margin-bottom:1.4rem}
   .last p{font-size:1.18rem; max-width:36rem; margin:0 0 1.1rem; text-wrap:pretty}
   .last .em{color:#f0b27a; font-style:italic}
   .sign{display:flex; align-items:center; gap:1.1rem; margin:2.6rem 0 0}
-  .seal{width:66px; height:66px; flex:none; display:grid; place-items:center; transform:rotate(-5deg); color:#f6e8d6; font-family:var(--display); font-weight:600; font-size:1.55rem; letter-spacing:.02em;
-    border-radius:5px; background:radial-gradient(circle at 30% 25%, rgba(255,255,255,.12), transparent 60%), var(--gamosa);
-    box-shadow:inset 0 0 0 3px rgba(0,0,0,.18), inset 0 0 0 5px rgba(246,232,214,.35)}
+  .sign .seal{flex:none; display:inline-flex; color:var(--gamosa)}
+  .seal svg{width:72px; height:48px}
   .sign b{display:block; font-family:var(--hand); font-weight:600; font-size:1.7rem; line-height:1.1; color:var(--night-ink)}
   .sign span{font-family:var(--mono); font-size:.66rem; letter-spacing:.12em; text-transform:uppercase; color:var(--night-soft)}
   .fireflies span{position:absolute; width:4px; height:4px; border-radius:50%; background:#f2d77c; box-shadow:0 0 10px 3px rgba(242,215,124,.55); opacity:0; animation:glow 5.5s ease-in-out infinite}
@@ -153,8 +152,7 @@
 
   @media (max-width:860px){
     .entry{grid-template-columns:1fr; gap:1.4rem}
-    .plate{position:relative; top:0; max-width:300px}
-    .plate canvas{aspect-ratio:4/3}
+    .plate{position:relative; top:0; width:min(280px,78vw); margin:0 auto .6rem}
     .station-grid{grid-template-columns:1fr}
     .specs{grid-template-columns:1fr 1fr}
     .spec:nth-child(3){padding-left:0; border-left:0}
@@ -164,7 +162,10 @@
     body{font-size:18px}
     .pair{grid-template-columns:1fr}
     .tmux__grid{grid-template-columns:1fr}
-    .hero__text{padding-top:96px}
+    .hero__text{padding-top:92px}
+    h1{font-size:clamp(2.1rem,9.4vw,2.6rem)}
+    .thesis{font-size:1.22rem}
+    .sub{font-size:1rem}
   }
   @media (prefers-reduced-motion:reduce){
     html{scroll-behavior:auto} .fireflies{display:none} .js .hero__text{opacity:1; transition:none}
@@ -313,7 +314,12 @@ green ✓</pre></div>
     <h2 class="eyebrow" id="short">In short</h2>
     <p>I want AI that does real work and can <span class="em">prove it earned your trust</span>. Voice you can talk over. Agents that ship and leave a record of why they were right. Software built for machines to run, with people steering.</p>
     <p>Same instinct every time: take a vague problem and get it to production, fast and carefully. I want more of that.</p>
-    <div class="sign"><span class="seal" aria-hidden="true">RK</span><div><b>Ridim Roshan Kashyap</b><span>Melbourne · from Assam, India</span></div></div>
+    <div class="sign"><span class="seal" aria-hidden="true"><svg viewBox="0 0 120 80" aria-hidden="true"><g fill="currentColor">
+      <rect x="54" y="54" width="8" height="18" rx="2.5"/><rect x="86" y="54" width="8" height="18" rx="2.5"/>
+      <ellipse cx="117" cy="63" rx="2" ry="2.6"/>
+      <path d="M11 55 C10 51 10 48 12 46 L17 16 L28 41 C31 37 34 35 39 35 C45 33 49 30 55 26 C63 22 73 22 83 24 C95 25 104 24 110 28 C115 31 118 36 118 44 C119 48 116 50 111 50 L111 72 L101 72 L100 54 C90 57 78 59 66 58 C60 58 55 57 52 56 L52 72 L42 72 L41 54 C35 55 27 56 21 56 C16 56 12 57 11 55 Z"/>
+      <path d="M39 35 C37 30 43 29 45 33 C46 36 41 37 39 35 Z"/>
+    </g><path d="M115 43 C121 48 121 57 117 62" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"/></svg></span><div><b>Ridim Roshan Kashyap</b><span>Melbourne · from Assam, India</span></div></div>
     <footer>
       <span>© 2026 Ridim Roshan Kashyap</span>
       <a href="#top">↑ back to first light</a>

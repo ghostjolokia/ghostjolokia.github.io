@@ -360,7 +360,7 @@ function buildHero() {
     add({ id: 'sky', t0: 0, t1: .9, sky: true });
     const clouds = [[-260, 250, .8, '#b9c8c6'], [1130, 120, 1.0, '#cfc29a'], [1560, 230, .7, '#b9c8c6'], [2080, 150, 1, '#cfc29a']].map(([x, y, s, c]) => ({ x, y, S: cloud(s, c) }));
     add({ id: 'clouds', t0: .3, t1: 1.3, groups: clouds });
-    add({ id: 'sun', t0: .45, t1: 1.05, sun: [1300, 330, 64] });
+    add({ id: 'sun', t0: .45, t1: 1.05, sun: [1300, 330, 64], sunLow: [1290, HOR - 92, 58] });
     // hills: two blue-grey ridges (Karbi Anglong across the river)
     const ridge = (k, base, amp1, amp2, off) => { const pts = []; for (let x = -620; x <= 2220; x += 14) pts.push([x, base - amp1 * fbm(x * .0042 + off) - amp2 * fbm(x * .013 + off * 3)]); pts.push([2220, HOR + 14], [-620, HOR + 14]); return pts; };
     add({ id: 'far-hills', t0: .5, t1: 1.5, wash: ridge(1, HOR - 40, 120, 34, 2), fill: '#a7b6b8', a: .5 });
@@ -419,11 +419,15 @@ function heroController() {
   const paths = {};
   const pathOf = d => paths[d] || (paths[d] = new Path2D(d));
 
+  const heroEl = cv.parentElement, textEl = heroEl.querySelector('.hero__text');
+  const narrow = () => cssW < 700;
   function camera() {
-    const vis = cssW < 700 ? clamp(cssW * 1.25, 460, 900) : Math.max(1600, cssW / 1.05);
+    const vis = narrow() ? clamp(cssW * 1.25, 460, 900) : Math.max(1600, cssW / 1.05);
     const s = cssW / vis;
     const cx = lerp(rhinoX(66) - 30, 800, ss(seg(vis, 600, 1500)));
-    return { s, ox: cssW / 2 - cx * s, oy: cssH - BOT * s, x0: cx - vis / 2, x1: cx + vis / 2 };
+    const ground = (BOT - HOR) * s, textBottom = textEl.offsetTop + textEl.offsetHeight;
+    const hor = Math.max(cssH - ground, textBottom + (narrow() ? 120 : 64) * Math.max(s, .7));
+    return { s, ox: cssW / 2 - cx * s, oy: hor - HOR * s, x0: cx - vis / 2, x1: cx + vis / 2, need: Math.ceil(hor + ground) };
   }
   const setWorld = c => c.setTransform(cam.s * DPR, 0, 0, cam.s * DPR, cam.ox * DPR, cam.oy * DPR);
   const setScreen = c => c.setTransform(DPR, 0, 0, DPR, 0, 0);
@@ -440,7 +444,7 @@ function heroController() {
     }
     setWorld(c);
     if (g.sun) {
-      const [x, y, r] = g.sun, a = ss(p);
+      const [x, y, r] = narrow() ? g.sunLow : g.sun, a = ss(p);
       withSeed(77, () => {
         c.beginPath(); c.arc(x, y, r * 1.9, 0, 7); c.fillStyle = rgba('#f0cf86', .22 * a); c.fill();
         c.beginPath(); c.arc(x, y, r, 0, 7); c.fillStyle = rgba('#eab95c', .78 * a); c.fill();
@@ -492,8 +496,9 @@ function heroController() {
         c.save(); c.font = `400 ${11 * k}px "IBM Plex Mono", monospace`; c.fillStyle = rgba(n.txt.startsWith('Brahma') ? '#5f7a82' : INK2, .7 * ss(q));
         c.letterSpacing = `${2.2 * k}px`; c.fillText(n.txt.toUpperCase(), n.x, n.y); c.restore(); return;
       }
-      if (n.to) leader(c, n.x + (n.bend > 0 ? 70 : -40) * k * .6, n.y + 14 * k, n.to[0], n.to[1], seg(q, .35, 1), n.bend, { lw: 1.4 * k, a: .65 });
-      hand(c, n.txt, n.x, n.y, seg(q, 0, .7), { size: n.size * k * .62 + 6, align: n.bend < 0 ? 'right' : 'left' });
+      if (n.to) leader(c, Math.max(n.x, cam.x0 + 14 / cam.s) + (n.bend > 0 ? 70 : -40) * k * .6, n.y + 14 * k, n.to[0], n.to[1], seg(q, .35, 1), n.bend, { lw: 1.4 * k, a: .65 });
+      const nx = n.bend < 0 ? n.x : Math.max(n.x, cam.x0 + 14 / cam.s);
+      hand(c, n.txt, nx, n.y, seg(q, 0, .7), { size: n.size * k * .62 + 6, align: n.bend < 0 ? 'right' : 'left' });
     });
   }
 
@@ -513,7 +518,9 @@ function heroController() {
   function resize(force) {
     const r = cv.getBoundingClientRect();
     if (!force && Math.abs(r.width - cssW) < 1 && Math.abs(r.height - cssH) < 80) return;
-    cssW = r.width; cssH = r.height; ctx = fitCanvas(cv, cssW, cssH); cam = camera();
+    cssW = r.width; cssH = r.height; cam = camera();
+    if (cam.need > cssH + 1) { heroEl.style.height = cam.need + 'px'; cssH = cam.need; cam = camera(); }
+    ctx = fitCanvas(cv, cssW, cssH);
     bake = offscreen(cv.width, cv.height); bakeUpTo = -1;
     if (painted) {                                  // re-bake everything static at the new size
       const firstSway = G.findIndex(g => g.sway);
@@ -549,8 +556,8 @@ function plateController(cv) {
     ctx.setTransform(DPR, 0, 0, DPR, 0, 0); ctx.clearRect(0, 0, cssW, cssH);
     ctx.setTransform(k * DPR, 0, 0, k * DPR, ox * DPR, oy * DPR);
     drawList(ctx, spec.S, ss(seg(p, 0, .82)));
-    const q = seg(p, .78, 1), n = spec.notes, small = cssW < 260;
-    const fs = small ? 30 : 25;
+    const q = seg(p, .78, 1), n = spec.notes;
+    const fs = Math.max(25, Math.min(34, 15 / k));
     if (kind === 'jolokia') {
       hand(ctx, n.title[0], 18, 34, q, { size: fs + 4, w: 600 }); hand(ctx, n.title[1], 18, 34 + fs * 1.15, seg(q, .15, 1), { size: fs });
       hand(ctx, n.title[2], 18, 34 + fs * 2.3, seg(q, .3, 1), { size: fs - 3, col: '#9c3328' });
